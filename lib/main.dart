@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -18,35 +20,30 @@ void main() {
   ));
 }
 
+class CountDown extends ValueNotifier {
+  late StreamSubscription sub;
+  CountDown({required int form}) : super(form) {
+    sub = Stream.periodic(const Duration(seconds: 1), (v) => form - v)
+        .takeWhile((value) => value >= 0)
+        .listen(
+          (value) => this.value = value,
+        );
+  }
+}
+
 class HomePage extends HookWidget {
-  HomePage({Key? key}) : super(key: key);
-  final DateFormat _dateFormat = DateFormat("hh:mm:ss a");
-  getTime() => Stream<String>.periodic(const Duration(seconds: 1), (_) {
-        final formated = _dateFormat.format(DateTime.now());
-        return formated.toString();
-      });
+  const HomePage({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    const String url = "https://bit.ly/3bjrYVZ";
-
-    final chachedImage = useMemoized(() => NetworkAssetBundle(Uri.parse(url))
-        .load(url)
-        .then((data) => data.buffer.asUint8List())
-        .then((data) => Image.memory(data)));
-
-    final image = useFuture(chachedImage);
-
+    final cachedValue = useMemoized(() => CountDown(form: 20));
+    final count = useListenable(cachedValue);
     return Scaffold(
       appBar: AppBar(
         title: const Text("Hook Example"),
         centerTitle: true,
       ),
-      body: Center(
-          child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [image.data].compactMap().toList(),
-      )),
+      body: Center(child: Text(count.value.toString())),
     );
   }
 }
