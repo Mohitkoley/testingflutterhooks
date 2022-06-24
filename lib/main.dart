@@ -25,10 +25,8 @@ void main() {
   ));
 }
 
-const String url = "https://images8.alphacoders.com/124/thumb-1920-1242638.jpg";
-
 class HomePage extends HookWidget {
-  HomePage({Key? key}) : super(key: key);
+  const HomePage({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
